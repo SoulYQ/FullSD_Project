@@ -1,0 +1,75 @@
+﻿@page "/members/"
+@inject HttpClient _client
+@inject IJSRuntime js
+@attribute [Authorize]
+
+<h3 class="card-title">Members</h3>
+<br />
+<a href="/members/create" class="btn btn-secondary">
+    <span class="oi oi-plus"></span>
+    Add New Members
+</a>
+<br />
+<br />
+
+@if (Members == null)
+{
+    <div class="alert alert-info">Loading Members...</div>
+}
+else
+{
+    <table class="table table-responsive">
+        <thead>
+            <tr>
+                <th>MemberCard Number</th>
+                <th>Contact Number</th>
+                <th>Email Address</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var member in Members)
+            {
+                <tr>
+                    <td>@member.MemberCardNo</td>
+                    <td>@member.ContactNumber</td>
+                    <td>
+                        @member.EmailAddress
+                    </td>
+                    <td>
+                        <a href="/members/view/@member.Id" class="btn btn-primary">
+                            <span class="oi oi-book"></span>
+                        </a>
+                        <a href="/members/edit/@member.Id" class="btn btn-warning">
+                            <span class="oi oi-pencil"></span>
+                        </a>
+                        <button class="btn btn-danger" @onclick="@(()=>Delete(member.Id))">
+                            <span class="oi oi-delete"></span>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@code {
+    private List<Member> Members;
+
+    protected async override Task OnInitializedAsync()
+    {
+        Members = await _client.GetFromJsonAsync<List<Member>>($"{Endpoints.MembersEndpoint}");
+    }
+
+    async Task Delete(int memberId)
+    {
+        var member = Members.First(q => q.Id == memberId);
+        var confirm = await js.InvokeAsync<bool>("confirm", $"Do you want to delete {member.MemberCardNo}?");
+        if (confirm)
+        {
+            await _client.DeleteAsync($"{Endpoints.MembersEndpoint}/{memberId}");
+            await OnInitializedAsync();
+        }
+    }
+}

@@ -1,0 +1,19 @@
+﻿@page "/members/create/"
+@inject HttpClient _client
+@inject NavigationManager _navManager
+
+<h3 class="card-title">Create New Members</h3>
+<hr />
+<br />
+
+<FormComponent ButtonText="Create Members" member="member" OnValidSubmit="@CreateMember" />
+
+@code {
+    Member member = new Member();
+
+    private async Task CreateMember()
+    {
+        await _client.PostAsJsonAsync(Endpoints.MembersEndpoint, member);
+        _navManager.NavigateTo("/members/");
+    }
+}

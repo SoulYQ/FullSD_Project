@@ -1,0 +1,28 @@
+﻿@page "/tools/create/"
+@inject HttpClient _client
+@inject NavigationManager _navManager
+
+<h3 class="card-title">Add New Tool</h3>
+<hr />
+<br />
+
+<FormComponent ButtonText="Create tool" tool="tool" OnValidSubmit="@CreateTool" />
+
+@code {
+    Tool tool = new Tool();
+
+    private IList<State> States;
+    private IList<Brand> Brands;
+
+    protected async override Task OnInitializedAsync()
+    {
+        States = await _client.GetFromJsonAsync<List<State>>($"{Endpoints.StatesEndpoint}");
+        Brands = await _client.GetFromJsonAsync<List<Brand>>($"{Endpoints.BrandsEndpoint}");
+    }
+
+    private async Task CreateTool()
+    {
+        await _client.PostAsJsonAsync(Endpoints.ToolsEndpoint, tool);
+        _navManager.NavigateTo("/tools/");
+    }
+}

@@ -1,0 +1,75 @@
+﻿@page "/tools/"
+@inject HttpClient _client
+@inject IJSRuntime js
+@attribute [Authorize]
+
+<h3 class="card-title">Tools</h3>
+<br />
+<a href="/tools/create" class="btn btn-secondary">
+    <span class="oi oi-plus"></span>
+    Add New Tool
+</a>
+<br />
+<br />
+
+@if (Tools == null)
+{
+    <div class="alert alert-info">Loading Tools...</div>
+}
+else
+{
+    <table class="table table-responsive">
+        <thead>
+            <tr>
+                <th>Brand</th>
+                <th>State</th>
+                <th>Year</th>
+                <th>Security Number</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var tool in Tools)
+            {
+                <tr>
+                    <td>@tool.Brand.Name</td>
+                    <td>@tool.State.Name</td>
+                    <td>@tool.Year</td>
+                    <td>@tool.securitynumber</td>
+                    <td>
+                        <a href="/vehicles/view/@tool.Id" class="btn btn-primary">
+                            <span class="oi oi-book"></span>
+                        </a>
+                        <a href="/vehicles/edit/@tool.Id" class="btn btn-warning">
+                            <span class="oi oi-pencil"></span>
+                        </a>
+                        <button class="btn btn-danger" @onclick="@(()=>Delete(tool.Id))">
+                            <span class="oi oi-delete"></span>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@code {
+    private List<Tool> Tools;
+
+    protected async override Task OnInitializedAsync()
+    {
+        Tools = await _client.GetFromJsonAsync<List<Tool>>($"{Endpoints.ToolsEndpoint}");
+    }
+
+    async Task Delete(int toolId)
+    {
+        var tool = Tools.First(q => q.Id == toolId);
+        var confirm = await js.InvokeAsync<bool>("confirm", $"Do you want to delete {tool.securitynumber}?");
+        if (confirm)
+        {
+            await _client.DeleteAsync($"{Endpoints.ToolsEndpoint}/{toolId}");
+            await OnInitializedAsync();
+        }
+    }
+}

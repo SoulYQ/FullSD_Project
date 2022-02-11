@@ -1,0 +1,23 @@
+﻿@page "/states/edit/{id:int}"
+@inject HttpClient _client
+@inject NavigationManager _navManager
+
+<h3>Edit States</h3>
+
+<FormComponent ButtonText="Update" OnValidSubmit="EditState" state="state" />
+
+@code {
+    [Parameter] public int id { get; set; }
+    State state = new State();
+
+    protected async override Task OnParametersSetAsync()
+    {
+        state = await _client.GetFromJsonAsync<State>($"{Endpoints.StatesEndpoint}/{id}");
+    }
+
+    async Task EditState()
+    {
+        await _client.PutAsJsonAsync($"{Endpoints.StatesEndpoint}/{id}", state);
+        _navManager.NavigateTo("/states/");
+    }
+}

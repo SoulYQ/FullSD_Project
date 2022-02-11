@@ -1,0 +1,17 @@
+﻿@page "/states/view/{id:int}"
+@inject HttpClient _client
+@inject NavigationManager _navManager
+
+<h3>View States</h3>
+
+<FormComponent state="state" Disabled="true" />
+
+@code {
+    [Parameter] public int id { get; set; }
+    State state = new State();
+
+    protected async override Task OnParametersSetAsync()
+    {
+        state = await _client.GetFromJsonAsync<State>($"{Endpoints.StatesEndpoint}/{id}");
+    }
+}

@@ -1,0 +1,91 @@
+﻿@inject HttpClient _client
+
+<EditForm Model="@tool" OnValidSubmit="@OnValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <fieldset disabled="@Disabled">
+        <div class="form-group">
+            <label>Make: </label>
+            <div>
+                <InputSelect @bind-Value="tool.BrandId" class="form-control">
+                    <option value="">-- Select Brand --</option>
+                    @if (Brands != null)
+                    {
+                        foreach (var brand in Brands)
+                        {
+                            <option value="@brand.Id">@brand.Name</option>
+                        }
+                    }
+                </InputSelect>
+                <ValidationMessage For="@(() => tool.BrandId)" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Model: </label>
+            <div>
+                <InputSelect @bind-Value="tool.StateId" class="form-control">
+                    <option value="">-- Select State --</option>
+                    @if (States != null)
+                    {
+                        foreach (var state in States)
+                        {
+                            <option value="@state.Id">@state.Name</option>
+                        }
+                    }
+                </InputSelect>
+                <ValidationMessage For="@(() => tool.StateId)" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Year: </label>
+            <div>
+                <InputNumber @bind-Value="@tool.Year" class="form-control" />
+                <ValidationMessage For="@(() => tool.Year)" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Security Number: </label>
+            <div>
+                <InputText @bind-Value="@tool.securitynumber" class="form-control" />
+                <ValidationMessage For="@(() => tool.securitynumber)" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Daily Rate: </label>
+            <div>
+                <InputNumber @bind-Value="@tool.RentalRate" class="form-control" />
+                <ValidationMessage For="@(() => tool.RentalRate)" />
+            </div>
+        </div>
+    </fieldset>
+
+    @if (!Disabled)
+    {
+        <button type="submit" class="btn btn-success btn-block">
+            @ButtonText
+        </button>
+    }
+    <BackToList Target="tools" />
+
+</EditForm>
+
+@code {
+    [Parameter] public bool Disabled { get; set; } = false;
+    [Parameter] public Tool tool { get; set; }
+    [Parameter] public string ButtonText { get; set; } = "Save";
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+
+    private IList<State> States;
+    private IList<Brand> Brands;
+
+        protected async override Task OnInitializedAsync()
+        {
+            States = await _client.GetFromJsonAsync<List<State>>($"{Endpoints.StatesEndpoint}");
+            Brands = await _client.GetFromJsonAsync<List<Brand>>($"{Endpoints.BrandsEndpoint}");
+        }
+}

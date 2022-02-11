@@ -1,0 +1,19 @@
+﻿@page "/states/create/"
+@inject HttpClient _client
+@inject NavigationManager _navManager
+
+<h3 class="card-title">Update New States</h3>
+<hr />
+<br />
+
+<FormComponent ButtonText="Create State" state="state" OnValidSubmit="@CreateState" />
+
+@code {
+    State state = new State();
+
+    private async Task CreateState()
+    {
+        await _client.PostAsJsonAsync(Endpoints.StatesEndpoint, state);
+        _navManager.NavigateTo("/states/");
+    }
+}

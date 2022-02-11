@@ -1,0 +1,17 @@
+﻿@page "/tools/view/{id:int}"
+@inject HttpClient _client
+@inject NavigationManager _navManager
+
+<h3>View Tool</h3>
+
+<FormComponent tool="tool" Disabled="true" />
+
+@code {
+    [Parameter] public int id { get; set; }
+    Tool tool = new Tool();
+
+    protected async override Task OnParametersSetAsync()
+    {
+        tool = await _client.GetFromJsonAsync<Tool>($"{Endpoints.ToolsEndpoint}/{id}");
+    }
+}

@@ -1,0 +1,69 @@
+﻿@page "/states"
+@inject HttpClient _client
+@inject IJSRuntime js
+@attribute [Authorize]
+
+<h3 class="card-title">Tool States</h3>
+<br />
+<a href="/states/create" class="btn btn-secondary">
+    <span class="oi oi-plus"></span>
+    Add New States
+</a>
+<br />
+<br />
+
+@if (States == null)
+{
+    <div class="alert alert-info">Loading States...</div>
+}
+else
+{
+    <table class="table table-responsive">
+        <thead>
+            <tr>
+                <th>States</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var state in States)
+            {
+                <tr>
+                    <td>@state.Name</td>
+                    <td>
+                        <a href="/states/view/@state.Id" class="btn btn-primary">
+                            <span class="oi oi-book"></span>
+                        </a>
+                        <a href="/states/edit/@state.Id" class="btn btn-warning">
+                            <span class="oi oi-pencil"></span>
+                        </a>
+                        <button class="btn btn-danger" @onclick="@(()=>Delete(state.Id))">
+                            <span class="oi oi-delete"></span>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<State> States;
+
+    protected async override Task OnInitializedAsync()
+    {
+        States = await _client.GetFromJsonAsync<List<State>>($"{Endpoints.StatesEndpoint}");
+    }
+
+    async Task Delete(int stateId)
+    {
+        var state = States.First(q => q.Id == stateId);
+        var confirm = await js.InvokeAsync<bool>("confirm", $"Do you want to delete {state.Name}?");
+        if (confirm)
+        {
+            await _client.DeleteAsync($"{Endpoints.StatesEndpoint}/{stateId}");
+            await OnInitializedAsync();
+        }
+
+    }
+}

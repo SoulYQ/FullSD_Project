@@ -1,0 +1,17 @@
+﻿@page "/members/view/{id:int}"
+@inject HttpClient _client
+@inject NavigationManager _navManager
+
+<h3>View Members</h3>
+
+<FormComponent member="member" Disabled="true" />
+
+@code {
+    [Parameter] public int id { get; set; }
+    Member member = new Member();
+
+    protected async override Task OnParametersSetAsync()
+    {
+        member = await _client.GetFromJsonAsync<Member>($"{Endpoints.MembersEndpoint}/{id}");
+    }
+}
